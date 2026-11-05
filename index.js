@@ -52,9 +52,9 @@ app.get('/usuarios', (req, res) => {
 //     return response.status(201).json(novoUsuario);
 // });
 
-app.post('/usuarios', (req,res) => {
+app.post('/usuarios', (req, res) => {
     const dados = req.body
-    
+
     usuario.create({
         nome: dados.nome,
         cargo: dados.cargo
@@ -87,7 +87,20 @@ app.post('/usuarios', (req,res) => {
 // });
 
 app.put('/usuarios/:nome', (req, res) => {
+    const nomeParametro = decodeURIComponent(req.params.nomeParametro)
     const dados = req.body
+    usuario.findOneAndUpdate(
+        { nome: { $regex: new RegExp("^" + nomeParametro + "$", "i") } }, // Acha o usuário
+        { nome: dados.nome, cargo: dados.cargo },                         // Atualiza o usuário
+        { new: true }
+    )
+        .then((usuarioAtualizado) => {
+            if (!usuarioAtualizado) {
+                return res.status(404).json({ erro: "Usuário não encontrado" })
+            }
+            return res.json(usuarioAtualizado)
+        })
+
 })
 
 // [DELETE] Remover pelo Nome
